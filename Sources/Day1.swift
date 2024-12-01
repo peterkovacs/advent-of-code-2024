@@ -2,20 +2,25 @@ import ArgumentParser
 import Foundation
 import Parsing
 
-struct Day1: ParsableCommand {
-    static var parser: some Parser<Substring, (Int, Int)> {
-        Parse(input: Substring.self) {
-            Int.parser()
-            Skip {
-                Whitespace()
+
+struct Day1: ParsingCommand {
+    static var parser: some Parser<Substring.UTF8View, [(Int, Int)]> {
+        Parse(input: Substring.UTF8View.self) {
+            Many {
+                Int.parser()
+                Whitespace(.horizontal)
+                Int.parser()
+            } separator: {
+                Whitespace(.vertical)
+            } terminator: {
+                Whitespace(.vertical)
             }
-            Int.parser()
         }
     }
 
 
     func run() throws {
-        let numbers = try input.map { try Self.parser.parse($0) }
+        let numbers = try parsed()
         let first = numbers.map(\.0)
         let second = numbers.map(\.1)
 

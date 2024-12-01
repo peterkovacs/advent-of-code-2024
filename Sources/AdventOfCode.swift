@@ -1,11 +1,6 @@
-// The Swift Programming Language
-// https://docs.swift.org/swift-book
-//
-// Swift Argument Parser
-// https://swiftpackageindex.com/apple/swift-argument-parser/documentation
-
 import ArgumentParser
 import Foundation
+import Parsing
 
 extension ParsableCommand {
   var input: AnyIterator<String> {
@@ -33,7 +28,19 @@ extension ParsableCommand {
       default: `default`
     )
   }
+}
 
+protocol ParsingCommand: ParsableCommand {
+    associatedtype Output
+    associatedtype ParserType where ParserType: Parser<Substring.UTF8View, Output>
+    static var parser: ParserType { get }
+    func parsed() throws -> Output
+}
+
+extension ParsingCommand {
+    func parsed() throws -> Output {
+        try Self.parser.parse(stdin)
+    }
 }
 
 @main struct AdventOfCode: ParsableCommand {
