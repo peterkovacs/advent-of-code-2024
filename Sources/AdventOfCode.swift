@@ -48,6 +48,7 @@ extension ParsingCommand {
     abstract: "AdventOfCode 2024",
     subcommands: [
       Day1.self,
+      Day2.self
     ]
   )
 
