@@ -8,7 +8,7 @@ struct Day3: ParsingCommand {
     enum Input {
         case `do`, `dont`, mul(Int, Int)
     }
-
+    
     static var parser: some Parser<Substring.UTF8View, [Input]> {
         Many(into: [Input]()) { (input: inout [Input], result: Input?) in
             if let result { input.append(result) }

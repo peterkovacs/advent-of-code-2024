@@ -33,7 +33,8 @@ extension ParsableCommand {
 protocol ParsingCommand: ParsableCommand {
     associatedtype Output
     associatedtype ParserType where ParserType: Parser<Substring.UTF8View, Output>
-    static var parser: ParserType { get }
+
+    @ParserBuilder<Substring.UTF8View> static var parser: ParserType { get }
     func parsed() throws -> Output
 }
 
@@ -49,7 +50,8 @@ extension ParsingCommand {
     subcommands: [
       Day1.self,
       Day2.self,
-      Day3.self
+      Day3.self,
+      Day4.self
     ]
   )
 

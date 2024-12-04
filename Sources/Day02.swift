@@ -5,21 +5,19 @@ import Algorithms
 
 struct Day2: ParsingCommand {
     static var parser: some Parser<Substring.UTF8View, [[Int]]> {
-        Parse {
-            Many {
-                Many(1...) {
-                    Int.parser()
-                } separator: {
-                    Whitespace(.horizontal)
-                } terminator: {
-                    Peek { Whitespace(.vertical) }
-                }
+        Many {
+            Many(1...) {
+                Int.parser()
             } separator: {
-                Whitespace(.vertical)
+                Whitespace(.horizontal)
             } terminator: {
-                Whitespace(.vertical)
-                End()
+                Peek { Whitespace(.vertical) }
             }
+        } separator: {
+            Whitespace(.vertical)
+        } terminator: {
+            Whitespace(.vertical)
+            End()
         }
     }
 
