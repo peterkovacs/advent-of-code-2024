@@ -69,18 +69,28 @@ extension Array where Element == Int {
     }
 
     mutating func fixOrder(rules: [Int: Set<Int>]) {
-        let specificRules = rules.mapValues { $0.intersection(self) }
+        let specificRules = rules.mapValues { $0.intersection(self) }.filter { !$0.value.isEmpty }
         var printed: Set<Int> = .init()
 
-        for var i in indices {
+        var i = startIndex
+        while i < endIndex {
+            defer { i = i.advanced(by: 1) }
             printed.insert(self[i])
-
             let dependencies = specificRules[self[i], default: .init()]
+
+            // Find the pages that haven't yet been printed.
             var notYetPrinted = Array(dependencies.subtracting(printed))
-            notYetPrinted.fixOrder(rules: rules)
+
+            guard !notYetPrinted.isEmpty else { continue }
+            // Recursively order them correctly.
+            notYetPrinted.fixOrder(rules: specificRules)
+            // Move the correctly ordered dependent pages to this position.
             insert(contentsOf: notYetPrinted, at: i)
+            // Mark them as printed.
             printed.formUnion(notYetPrinted)
+            // Move our index up
             i = i.advanced(by: notYetPrinted.count)
+            // This is the ugliest part -- remove the pages we just moved up from the rest of the order.
             self[i...].removeAll(where: { notYetPrinted.contains($0) })
         }
     }
