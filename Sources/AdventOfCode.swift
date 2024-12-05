@@ -38,9 +38,20 @@ protocol ParsingCommand: ParsableCommand {
     func parsed() throws -> Output
 }
 
+enum ParsingError: Error {
+    case fileNotFound(URL)
+}
+
 extension ParsingCommand {
     func parsed() throws -> Output {
         try Self.parser.parse(stdin)
+    }
+
+    func parsed(file: URL) throws -> Output {
+        guard let file = try String(data: Data(contentsOf: file), encoding: .utf8) else {
+            throw ParsingError.fileNotFound(file)
+        }
+        return try Self.parser.parse(file)
     }
 }
 
@@ -51,7 +62,8 @@ extension ParsingCommand {
       Day1.self,
       Day2.self,
       Day3.self,
-      Day4.self
+      Day4.self,
+      Day5.self
     ]
   )
 
