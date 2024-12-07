@@ -22,7 +22,7 @@ struct Day2: ParsingCommand {
     }
 
     func run() throws {
-        let input = try parsed()
+        let input = try parsed(file: "02.txt")
 
         let part1 = input.count(where: \.isSafe)
         print("Part 1", part1)

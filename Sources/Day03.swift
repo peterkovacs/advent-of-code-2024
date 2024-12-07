@@ -33,7 +33,7 @@ struct Day3: ParsingCommand {
     }
 
     func run() throws {
-        let input = try parsed()
+        let input = try parsed(file: "03.txt")
         let part1 = input
             .compactMap { $0[case: \Input.Cases.mul] }
             .map { $0 * $1 }

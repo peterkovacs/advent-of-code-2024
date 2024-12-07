@@ -62,7 +62,7 @@ struct Day6: ParsableCommand {
     }
 
     func run() throws {
-        let grid = grid
+        let grid = try grid(file: "06.txt")
         guard let startingPosition = grid.indices.first(where: { grid[$0] == "^" }) else { fatalError("No starting position found") }
 
         let (path, part1) = part1(position: .init(position: startingPosition, direction: .up), grid: grid)

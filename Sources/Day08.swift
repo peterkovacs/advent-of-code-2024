@@ -2,7 +2,7 @@ import ArgumentParser
 
 struct Day8: ParsableCommand {
     func run() throws {
-        let grid = grid
+        let grid = try grid(file: "08.txt")
         let positions = grid.indices.reduce(into: [Character: [Coord]]()) { result, p in
             guard grid[p] != "." else { return }
             result[ grid[p], default: [] ].append(p)

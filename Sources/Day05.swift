@@ -27,7 +27,7 @@ struct Day5: ParsingCommand {
     }
 
     func run() throws {
-        let (rules, order) = try parsed()
+        let (rules, order) = try parsed(file: "05.txt")
         let dependencies = rules.reduce(into: [Int: Set<Int>]()) {
             $0[$1.1, default: .init()].insert($1.0)
         }

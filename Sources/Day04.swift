@@ -64,7 +64,7 @@ struct Day4: ParsableCommand {
     }
 
     func run() throws {
-        let grid = infiniteGrid(".")
+        let grid = try infiniteGrid(".", file: "04.txt")
 
         let part1 = part1(grid)
         print("Part 1", part1)

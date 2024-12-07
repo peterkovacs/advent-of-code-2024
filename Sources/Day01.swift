@@ -20,7 +20,7 @@ struct Day1: ParsingCommand {
 
 
     func run() throws {
-        let numbers = try parsed()
+        let numbers = try parsed(file: "01.txt")
         let first = numbers.map(\.0)
         let second = numbers.map(\.1)
 

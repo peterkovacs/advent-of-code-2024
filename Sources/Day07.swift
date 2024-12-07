@@ -16,7 +16,7 @@ struct Day7: ParsingCommand {
     }
 
     func run() throws {
-        let input = try parsed()
+        let input = try parsed(file: "07.txt")
 
         let (p2input, p1input) = input.partitioned { (target, operands) in
             solve(target: target, operands: operands[...].reversed())
