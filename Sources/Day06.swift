@@ -2,66 +2,64 @@ import ArgumentParser
 
 struct Day6: ParsableCommand {
 
-    func part1(position: Coord, grid: Grid<Character>) -> ([Coord], Int) {
-        var grid = grid
+    func part1(position startingPosition: Vector, grid: Grid<Character>) -> ([Vector], Int) {
         var visited: Set<Coord> = []
+        var path: [Vector] = []
         visited.reserveCapacity(grid.elements.count)
-        var facing = Coord.up
-        var position = position
+        var position = startingPosition
 
-        while grid.isValid(position) {
-
-            let inFront = position + facing
-            if grid.isValid(inFront) && grid[inFront] == "#" {
-                facing = facing.clockwise
+        while grid.isValid(position.position) {
+            if visited.insert(position.position).inserted {
+                path.append(position)
             }
 
-            grid[position] = "X"
-            visited.insert(position)
-            position = position + facing
+            let inFront = position.position + position.direction
+            if grid.isValid(inFront) && grid[inFront] == "#" {
+                position.direction = position.direction.clockwise
+            }
+
+            position.position = position.position + position.direction
         }
 
-        return (Array(visited), visited.count)
+        return (path, visited.count)
     }
 
-    func part2(position startingPosition: Coord, positions: [Coord], grid: Grid<Character>) -> Int {
-
-        func isLoop(at obstacle: Coord) -> Bool {
-            var vector = Vector(position: startingPosition, direction: .up)
+    func part2(path: [Vector], grid: Grid<Character>) -> Int {
+        // place an obstacle at the next position in the path, run a simulation from our current position
+        func isLoop(at obstacle: Coord, path: ArraySlice<Vector>, position: Vector) -> Bool {
+            var position = position
             var visited: Set<Vector> = []
-            visited.reserveCapacity(positions.count * 4)
+            visited.reserveCapacity(path.count * 4)
 
-            while grid.isValid(vector.position) {
-                guard visited.insert(vector).inserted else { return true }
+            while grid.isValid(position.position) {
+                guard visited.insert(position).inserted else { return true }
 
                 while true {
-                    let inFront = vector.position + vector.direction
+                    let inFront = position.position + position.direction
                     if inFront == obstacle || (grid.isValid(inFront) && grid[inFront] == "#") {
-                        vector.direction = vector.direction.clockwise
+                        position.direction = position.direction.clockwise
                     }
                     else { break }
                 }
 
-                vector.position = vector.position + vector.direction
+                position.position = position.position + position.direction
             }
 
             return false
         }
 
-        return positions
-            .filter {
-                isLoop(at: $0)
-            }
-            .count
+        return path.indices.dropLast().filter {
+            isLoop(at: path[$0 + 1].position, path: path[..<$0], position: path[$0])
+        }.count
     }
 
     func run() throws {
         let grid = grid
         guard let startingPosition = grid.indices.first(where: { grid[$0] == "^" }) else { fatalError("No starting position found") }
 
-        let (path, p1) = part1(position: startingPosition, grid: grid)
-        print("Part 1", p1)
-        print("Part 2", part2(position: startingPosition, positions: path, grid: grid))
+        let (path, part1) = part1(position: .init(position: startingPosition, direction: .up), grid: grid)
+        print("Part 1", part1, path.count)
+        print("Part 2", part2(path: path, grid: grid))
 
     }
 }

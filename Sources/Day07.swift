@@ -71,7 +71,7 @@ struct Day7: ParsingCommand {
 }
 
 infix operator ||
-func || (lhs: Int, rhs: Int) -> Int {
+fileprivate func || (lhs: Int, rhs: Int) -> Int {
     switch rhs {
     case 0..<10: return lhs * 10 + rhs
     case 10..<100: return lhs * 100 + rhs
