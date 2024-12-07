@@ -64,7 +64,8 @@ extension ParsingCommand {
       Day3.self,
       Day4.self,
       Day5.self,
-  Day6.self
+      Day6.self,
+      Day7.self
     ]
   )
 
