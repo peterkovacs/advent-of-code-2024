@@ -28,7 +28,7 @@ struct Day6: ParsableCommand {
 
     func part2(path: [Vector], grid: Grid<Character>) -> Int {
         // place an obstacle at the next position in the path, run a simulation from our current position
-        @Sendable func isLoop(at obstacle: Coord, path: ArraySlice<Vector>, position: Vector) -> Bool {
+        @Sendable func isLoop(at obstacle: Coord, position: Vector) -> Bool {
             var position = position
             var visited: Set<Vector> = []
             visited.reserveCapacity(path.count * 4)
@@ -53,7 +53,7 @@ struct Day6: ParsableCommand {
         let counter = ManagedAtomic<Int>(0)
 
         DispatchQueue.concurrentPerform(iterations: path.count - 1) { index in
-            if isLoop(at: path[index + 1].position, path: path[..<index], position: path[index]) {
+            if isLoop(at: path[index + 1].position, position: path[index]) {
                 counter.wrappingIncrement(ordering: .relaxed)
             }
         }
