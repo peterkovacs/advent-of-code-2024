@@ -2,9 +2,10 @@ import ArgumentParser
 
 struct Day6: ParsableCommand {
 
-    func part1(position: Coord, grid: Grid<Character>) -> (Grid<Character>, Int) {
+    func part1(position: Coord, grid: Grid<Character>) -> ([Coord], Int) {
         var grid = grid
         var visited: Set<Coord> = []
+        visited.reserveCapacity(grid.elements.count)
         var facing = Coord.up
         var position = position
 
@@ -20,20 +21,22 @@ struct Day6: ParsableCommand {
             position = position + facing
         }
 
-        return (grid, visited.count)
+        return (Array(visited), visited.count)
     }
 
-    func part2(position startingPosition: Coord, grid: Grid<Character>) -> Int {
-        func isLoop(at: Coord) -> Bool {
+    func part2(position startingPosition: Coord, positions: [Coord], grid: Grid<Character>) -> Int {
+
+        func isLoop(at obstacle: Coord) -> Bool {
             var vector = Vector(position: startingPosition, direction: .up)
             var visited: Set<Vector> = []
+            visited.reserveCapacity(positions.count * 4)
 
             while grid.isValid(vector.position) {
                 guard visited.insert(vector).inserted else { return true }
 
                 while true {
                     let inFront = vector.position + vector.direction
-                    if inFront == at || (grid.isValid(inFront) && grid[inFront] == "#") {
+                    if inFront == obstacle || (grid.isValid(inFront) && grid[inFront] == "#") {
                         vector.direction = vector.direction.clockwise
                     }
                     else { break }
@@ -44,11 +47,8 @@ struct Day6: ParsableCommand {
 
             return false
         }
-        return grid
-            .indices
-            .filter {
-                $0 != startingPosition && grid[$0] == "X"
-            }
+
+        return positions
             .filter {
                 isLoop(at: $0)
             }
@@ -61,7 +61,7 @@ struct Day6: ParsableCommand {
 
         let (path, p1) = part1(position: startingPosition, grid: grid)
         print("Part 1", p1)
-        print("Part 2", part2(position: startingPosition, grid: path))
+        print("Part 2", part2(position: startingPosition, positions: path, grid: grid))
 
     }
 }
