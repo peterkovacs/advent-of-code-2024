@@ -3,7 +3,7 @@ import CoreGraphics
 import Foundation
 import Numerics
 
-public struct Coord: Equatable, Hashable {
+public struct Coord: Equatable, Hashable, Sendable {
   public var x, y: Int
 
   public init(x: Int, y: Int) {
@@ -192,6 +192,8 @@ public struct Grid<Element> {
     coord.around.filter(isValid)
   }
 }
+
+extension Grid: Sendable where Element: Sendable {}
 
 extension Grid: Sequence {
   public struct CoordinateIterator: Sequence, IteratorProtocol {

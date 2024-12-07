@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct Vector: Hashable {
+public struct Vector: Hashable, Sendable {
   public var position: Coord
   public var direction: Coord
 
