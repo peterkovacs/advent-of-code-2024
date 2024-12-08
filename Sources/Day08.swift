@@ -3,15 +3,16 @@ import ArgumentParser
 struct Day8: ParsableCommand {
     func run() throws {
         let grid = try grid(file: "08.txt")
-        let positions = grid.indices.reduce(into: [Character: [Coord]]()) { result, p in
-            guard grid[p] != "." else { return }
-            result[ grid[p], default: [] ].append(p)
-        }
+        let positions = grid.indices
+            .reduce(into: [Character: [Coord]]()) { result, p in
+                guard grid[p] != "." else { return }
+                result[ grid[p], default: [] ].append(p)
+            }
+            .values
+            .flatMap { $0.permutations(ofCount: 2) }
 
         let part1 = Set(
             positions
-                .values
-                .flatMap { $0.permutations(ofCount: 2) }
                 .map { $0[0] - ($0[1] - $0[0]) }
                 .filter { grid.isValid($0) }
         )
@@ -20,8 +21,6 @@ struct Day8: ParsableCommand {
 
         let part2 = Set(
             positions
-                .values
-                .flatMap { $0.permutations(ofCount: 2) }
                 .flatMap {
                     let (a, b) = ($0[0], $0[1])
                     return (0...)

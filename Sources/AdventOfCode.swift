@@ -102,4 +102,15 @@ extension ParsingCommand {
     )
 
     init() { }
+
+    func run() throws {
+        try Day1().run()
+        try Day2().run()
+        try Day3().run()
+        try Day4().run()
+        try Day5().run()
+        try Day6().run()
+        try Day7().run()
+        try Day8().run()
+    }
 }
