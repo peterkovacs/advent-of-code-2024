@@ -13,23 +13,6 @@ extension ParsableCommand {
         return try FileHandle(forReadingFrom: url).readToEnd() ?? Data()
     }
 
-//    var input: AnyIterator<String> {
-//        .init { readLine(strippingNewline: true) }
-//    }
-//
-//    var stdin: String {
-//        String(data: FileHandle.standardInput.readDataToEndOfFile(), encoding: .utf8) ?? "invalid utf-8 input"
-//    }
-//
-//    var grid: Grid<Character> {
-//        let input = Array(input)
-//        return Grid(input.joined(), size: .init(x: input[0].count, y: input.count))
-//    }
-
-//    func infiniteGrid(_ default: Character) -> InfiniteGrid<Character> {
-//        infiniteGrid(`default`, lines: Array(input))
-//    }
-
     func grid(file: String) throws -> Grid<Character> {
         guard let data = String(data: try read(filename: file), encoding: .utf8)?.split(separator: /\n|\r\n/) else {
             throw ParsingError.invalidInput
@@ -70,10 +53,6 @@ enum ParsingError: Error {
 }
 
 extension ParsingCommand {
-//    func parsed() throws -> Output {
-//        try Self.parser.parse(stdin)
-//    }
-
     func parsed(file: String) throws -> Output {
         let data = try read(filename: file)
         guard
