@@ -13,7 +13,8 @@ let package = Package(
         .package(url: "https://github.com/pointfreeco/swift-parsing.git", from: "0.13.0"),
         .package(url: "https://github.com/apple/swift-algorithms.git", from: "1.2.0"),
         .package(url: "https://github.com/apple/swift-numerics.git", from: "1.0.2"),
-        .package(url: "https://github.com/apple/swift-atomics.git", from: "1.2.0")
+        .package(url: "https://github.com/apple/swift-atomics.git", from: "1.2.0"),
+        .package(url: "https://github.com/apple/swift-collections.git", .upToNextMajor(from: "1.1.4")),
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
@@ -26,6 +27,7 @@ let package = Package(
                 .product(name: "Algorithms", package: "swift-algorithms"),
                 .product(name: "Numerics", package: "swift-numerics"),
                 .product(name: "Atomics", package: "swift-atomics"),
+                .product(name: "Collections", package: "swift-collections"),
             ]
         ),
     ]
