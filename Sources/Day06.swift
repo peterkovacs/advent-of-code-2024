@@ -29,12 +29,20 @@ struct Day6: ParsableCommand {
     func part2(path: [Vector], grid: Grid<Character>) -> Int {
         // place an obstacle at the next position in the path, run a simulation from our current position
         @Sendable func isLoop(at obstacle: Coord, position: Vector) -> Bool {
+            var visited = Grid(repeating: 0, size: grid.size)
             var position = position
-            var visited: Set<Vector> = []
-            visited.reserveCapacity(path.count * 4)
 
             while grid.isValid(position.position) {
-                guard visited.insert(position).inserted else { return true }
+                var value = 0
+                value |= position.direction.x <  0 ? (1 << 5) : 0
+                value |= position.direction.y <  0 ? (1 << 4) : 0
+                value |= position.direction.x >  0 ? (1 << 3) : 0
+                value |= position.direction.y >  0 ? (1 << 2) : 0
+                value |= position.direction.x == 0 ? (1 << 1) : 0
+                value |= position.direction.y == 0 ? (1 << 0) : 0
+
+                if (visited[position.position] & value) == value { return true }
+                visited[position.position] |= value
 
                 while true {
                     let inFront = position.position + position.direction

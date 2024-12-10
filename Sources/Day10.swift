@@ -12,7 +12,7 @@ struct Day10: ParsableCommand {
         print("Part 1", part1)
 
 
-        let part2 = startingPositions.reduce(into: 0) { $0 += dfs(from: $1, visited: [], in: grid) }
+        let part2 = startingPositions.reduce(into: 0) { $0 += dfs(from: $1, in: grid) }
         print("Part 2", part2)
 
     }
@@ -42,16 +42,12 @@ struct Day10: ParsableCommand {
         return result
     }
 
-    func dfs(from: Coord, visited: Set<Coord>, in grid: Grid<Int>) -> Int {
+    func dfs(from: Coord, in grid: Grid<Int>) -> Int {
         if grid[from] == 9 { return 1 }
-
-        var visited = visited
-        visited.insert(from)
-
+        
         let neighbors = grid.neighbors(adjacent: from)
             .filter { grid[$0] - grid[from] == 1 }
-            .filter { visited.contains($0) == false }
 
-        return neighbors.reduce(into: 0) { $0 += dfs(from: $1, visited: visited, in: grid) }
+        return neighbors.reduce(into: 0) { $0 += dfs(from: $1, in: grid) }
     }
 }

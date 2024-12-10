@@ -86,8 +86,8 @@ extension ParsingCommand {
 
     func run() throws {
         func go<T>(_ type: T.Type) throws where T: ParsableCommand {
-            var command = type.init()
             print(T._commandName)
+            var command = try T.parse(nil)
             try command.run()
             print()
         }
