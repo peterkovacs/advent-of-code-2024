@@ -16,11 +16,11 @@ struct Day16: ParsableCommand {
     }
 
     struct Element: Hashable, Comparable {
-        let vector: Vector
-        let score: Int
-        let tiles: [Coord]
+        var vector: Vector
+        var score: Int
+        var tiles: [Coord]
 
-        static func < (lhs: Element, rhs: Element) -> Bool {
+        @inlinable static func < (lhs: Element, rhs: Element) -> Bool {
             lhs.score < rhs.score
         }
     }
@@ -35,7 +35,7 @@ struct Day16: ParsableCommand {
         var cost = Int.max
         var tiles: Set<Coord> = [ position, goal ]
 
-        while let current = queue.popMin() {
+        while var current = queue.popMin() {
             // We've exhausted all possibilities of beating our score.
             guard current.score <= cost else { break }
 
@@ -50,58 +50,57 @@ struct Day16: ParsableCommand {
             }
 
             visited[current.vector.position] |= current.vector.direction.bit
+            do {
+                let visited = visited[current.vector.position]
 
-            var neighbors: [Element] = []
-            var tiles = current.tiles
-            let forward = current.vector.position + current.vector.direction
-
-            // Check the tile in front
-            if grid[forward] != "#" &&
-                (visited[forward] & current.vector.direction.bit) == 0 &&
-                distance[forward][keyPath: current.vector.direction.keyPath] >= current.score + 1
-            {
-                tiles.append(forward)
-                neighbors.append(
-                    Element(
-                        vector: .init(
-                            position: forward,
-                            direction: current.vector.direction
-                        ),
-                        score: current.score + 1,
-                        tiles: tiles
-                    )
-                )
-            }
-
-            // check turning left or right
-            neighbors.append(
-                contentsOf:  [
-                    Element(
+                if
+                    (visited & current.vector.direction.clockwise.bit) == 0,
+                    distance[current.vector.position][keyPath: current.vector.direction.clockwise.keyPath] >= current.score + 1000
+                {
+                    let i = Element(
                         vector: .init(
                             position: current.vector.position,
                             direction: current.vector.direction.clockwise
                         ),
                         score: current.score + 1000,
                         tiles: current.tiles
-                    ),
-                    Element(
+                    )
+
+                    distance[i.vector.position][keyPath: i.vector.direction.keyPath] = i.score
+                    queue.insert(i)
+
+                }
+
+                if
+                    (visited & current.vector.direction.counterClockwise.bit) == 0,
+                    distance[current.vector.position][keyPath: current.vector.direction.counterClockwise.keyPath] >= current.score + 1000
+                {
+                    let i = Element(
                         vector: .init(
                             position: current.vector.position,
                             direction: current.vector.direction.counterClockwise
                         ),
                         score: current.score + 1000,
                         tiles: current.tiles
-                    ),
-                ]
-                    .filter {
-                        (visited[$0.vector.position] & $0.vector.direction.bit) == 0 &&
-                        distance[$0.vector.position][keyPath: $0.vector.direction.keyPath] >= $0.score
-                    }
-            )
+                    )
 
-            for i in neighbors {
-                distance[i.vector.position][keyPath: i.vector.direction.keyPath] = i.score
-                queue.insert(i)
+                    distance[i.vector.position][keyPath: i.vector.direction.keyPath] = i.score
+                    queue.insert(i)
+                }
+            }
+
+            current.vector.position = current.vector.position + current.vector.direction
+            current.score += 1
+
+            // Check the tile in front
+            if
+                grid[current.vector.position] != "#",
+                (visited[current.vector.position] & current.vector.direction.bit) == 0,
+                distance[current.vector.position][keyPath: current.vector.direction.keyPath] >= current.score
+            {
+                current.tiles.append(current.vector.position)
+                distance[current.vector.position][keyPath: current.vector.direction.keyPath] = current.score
+                queue.insert(current)
             }
         }
 
@@ -124,10 +123,10 @@ fileprivate extension Coord {
 
     var keyPath: WritableKeyPath<(Int, Int, Int, Int), Int> {
         switch self {
-        case .left:  return \(Int, Int, Int, Int).0
-        case .right: return \(Int, Int, Int, Int).1
-        case .up:    return \(Int, Int, Int, Int).2
-        case .down:  return \(Int, Int, Int, Int).3
+        case .left:  return \.0
+        case .right: return \.1
+        case .up:    return \.2
+        case .down:  return \.3
         default: fatalError()
         }
     }
