@@ -25,9 +25,11 @@ extension Coord {
   public static var left:  Self { .init(x: -1, y: 0) }
   public static var up:    Self { .init(x: 0, y: -1) }
   public static var down:  Self { .init(x: 0, y: 1)  }
+
 }
 
-extension KeyPath: CustomStringConvertible where Root == Coord, Value == Coord {
+#if DEBUG
+extension KeyPath: @retroactive CustomStringConvertible where Root == Coord, Value == Coord {
     public var description: String {
         switch self {
         case \Coord.up: return "up"
@@ -38,6 +40,7 @@ extension KeyPath: CustomStringConvertible where Root == Coord, Value == Coord {
         }
     }
 }
+#endif
 
 extension Coord {
   public var adjacent: [Coord] {
