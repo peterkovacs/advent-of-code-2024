@@ -27,6 +27,18 @@ extension Coord {
   public static var down:  Self { .init(x: 0, y: 1)  }
 }
 
+extension KeyPath: CustomStringConvertible where Root == Coord, Value == Coord {
+    public var description: String {
+        switch self {
+        case \Coord.up: return "up"
+        case \Coord.left: return "left"
+        case \Coord.down: return "down"
+        case \Coord.right: return "right"
+        default: fatalError("Unknown key path \(self)")
+        }
+    }
+}
+
 extension Coord {
   public var adjacent: [Coord] {
     [up, `left`, down, `right`]
@@ -174,6 +186,14 @@ public struct Grid<Element> {
       yield &elements[p.y * size.x + p.x]
     }
   }
+
+    public mutating func swapAt(_ from: Coord, _ to: Coord) {
+        let from = from.applying(transform)
+        let to = to.applying(transform)
+        assert(from.x < size.x && from.x >= 0 && from.y < size.y && from.y >= 0, "coordinate out of bounds")
+        assert(to.x < size.x && to.x >= 0 && to.y < size.y && to.y >= 0, "coordinate out of bounds")
+        elements.swapAt(from.y * size.x + from.x, to.y * size.x + to.x)
+    }
 
   public var corners: [Coord] {
     [
