@@ -81,25 +81,26 @@ struct Day17: ParsingCommand {
 
             var results: [Int] = []
 
+            // combinations of the next 3 possible bits (that may have been restricted by previous calculations)
             for (j, (k, l)) in product(bits[i+2], product(bits[i+1], bits[i])) {
                 let a = j << 2 | k << 1 | l
                 let b = a ^ 0b010
 
                 var bits = bits
 
-                // set bits of our chosen a value
+                // set bits of our chosen `a` value
                 bits[i] = [l]
                 bits[i+1] = [k]
                 bits[i+2] = [j]
 
-                // given the value of b, we need to find an a such that
+                // given the value of `b`, we need to find an `a` such that
                 // c = a >> b
                 // (b ^ c) ^ 0b111 == output
 
                 let c = (output ^ 0b111) ^ b
                 assert( (b ^ c) ^ 0b111 == output )
 
-                // Check that bits can support this value of c
+                // Check that previously-calculated bits can support this value of `c`
                 guard (0..<3).allSatisfy({ bits[i + b + $0].contains((c >> $0) & 1) }) else { continue }
 
                 // restricting future bits as appropriate
