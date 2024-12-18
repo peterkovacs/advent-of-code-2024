@@ -33,146 +33,33 @@ struct Day17: ParsingCommand {
         var pc: Int
         var output: [Int] = []
 
+        @inlinable func combo(_ operand: Int) -> Int {
+            switch operand {
+            case 0, 1, 2, 3: operand
+            case 4: a
+            case 5: b
+            case 6: c
+            default: fatalError()
+            }
+        }
+
         mutating func execute() -> Bool {
             guard program.indices.contains(pc) else { return false }
             switch program[pc] {
-            case 0:
-                // The adv instruction (opcode 0) performs division. The numerator is the value in the A register.
-                // The denominator is found by raising 2 to the power of the instruction's combo operand.
-                // (So, an operand of 2 would divide A by 4 (2^2); an operand of 5 would divide A by 2^B.)
-                // The result of the division operation is truncated to an integer and then written to the A register.
-                let operand = Int(program[pc + 1])
-                switch operand {
-                case 0, 1, 2, 3:
-//                    print("[pc:\(pc)] a = a >> \(String(operand, radix: 2))")
-                    a = a >> operand
-                case 4:
-//                    print("[pc:\(pc)] a = a >> a")
-                    a = a >> a
-
-                case 5:
-//                    print("[pc:\(pc)] a = a >> b")
-                    a = a >> b
-                case 6:
-//                    print("[pc:\(pc)] a = a >> c")
-                    a = a >> c
-                default: fatalError()
-                }
-                pc += 2
-
-            case 1:
-                // The bxl instruction (opcode 1) calculates the bitwise XOR of register B and the
-                // instruction's literal operand, then stores the result in register B.
-                let operand = Int(program[pc + 1])
-//                print("[pc:\(pc)] b = b ^ \(String(operand, radix: 2))")
-                b = b ^ operand
-                pc += 2
-
-
-            case 2:
-                // The bst instruction (opcode 2) calculates the value of its combo operand modulo 8
-                // (thereby keeping only its lowest 3 bits), then writes that value to the B register.
-
-                let operand = Int(program[pc + 1])
-                switch operand {
-                case 0, 1, 2, 3:
-//                    print("[pc:\(pc)] b = \(String(operand, radix: 2))")
-                    b = operand
-                case 4:
-//                    print("[pc:\(pc)] b = a & 111")
-                    b = a & 7
-                case 5:
-//                    print("[pc:\(pc)] b = b & 111")
-                    b = b & 7
-                case 6:
-//                    print("[pc:\(pc)] b = c & 111")
-                    b = c & 7
-                default: fatalError()
-                }
-
-                pc += 2
+            case 0: a >>= combo(program[pc + 1])
+            case 1: b = b ^ program[pc + 1]
+            case 2: b = combo(program[pc + 1]) & 7
             case 3:
-                // The jnz instruction (opcode 3) does nothing if the A register is 0.
-                // However, if the A register is not zero, it jumps by setting the instruction pointer to
-                // the value of its literal operand; if this instruction jumps, the instruction pointer
-                // is not increased by 2 after this instruction.
-
-//                print("[pc:\(pc)] if \(a) != 0, jump \(program[pc + 1])")
-
-                if a == 0 { pc += 2 }
-                else { pc = Int(program[pc + 1]) }
-
-            case 4:
-                // The bxc instruction (opcode 4) calculates the bitwise XOR of register B and register C,
-                // then stores the result in register B. (For legacy reasons, this instruction reads an operand but ignores it.)
-//                print("[pc:\(pc)] b = b ^ c")
-                b = b ^ c
-                pc += 2
-
-            case 5:
-                // The out instruction (opcode 5) calculates the value of its combo operand modulo 8,
-                // then outputs that value. (If a program outputs multiple values, they are separated by commas.)
-
-                let operand = Int(program[pc + 1])
-                switch operand {
-                case 0, 1, 2, 3:
-//                    print("[pc:\(pc)] output \(String(operand, radix: 2)))")
-                    output.append(operand)
-                case 4:
-//                    print("[pc:\(pc)] output a & 7: \(String(a & 7, radix: 2))")
-                    output.append(a & 7)
-                case 5:
-//                    print("[pc:\(pc)] output b & 7: \(String(b & 7, radix: 2))")
-                    output.append(b & 7)
-                case 6:
-//                    print("[pc:\(pc)] output c & 7: \(String(c & 7, radix: 2))")
-                    output.append(c & 7)
-                default : fatalError()
-                }
-                pc += 2
-
-            case 6:
-                let operand = Int(program[pc + 1])
-                switch operand {
-                case 0, 1, 2, 3:
-//                    print("[pc:\(pc)] b = a >> \(String(operand, radix: 2))")
-                    b = a >> operand
-                case 4:
-//                    print("[pc:\(pc)] b = a >> a")
-                    b = a >> a
-
-                case 5:
-//                    print("[pc:\(pc)] b = a >> b")
-                    b = a >> b
-                case 6:
-//                    print("[pc:\(pc)] b = a >> c")
-                    b = a >> c
-                default: fatalError()
-                }
-                pc += 2
-
-            case 7:
-                let operand = Int(program[pc + 1])
-                switch operand {
-                case 0, 1, 2, 3:
-//                    print("[pc:\(pc)] c = a >> \(String(operand, radix: 2))")
-                    c = a >> operand
-                case 4:
-//                    print("[pc:\(pc)] c = a >> a")
-                    c = a >> a
-                case 5:
-//                    print("[pc:\(pc)] c = a >> b")
-                    c = a >> b
-                case 6:
-//                    print("[pc:\(pc)] c = a >> c")
-                    c = a >> c
-                default: fatalError()
-                }
-                pc += 2
-
+                pc = (a == 0) ? pc + 2 : program[pc + 1]
+                return true
+            case 4: b = b ^ c
+            case 5: output.append(combo(program[pc + 1]) & 7)
+            case 6: b = a >> combo(program[pc + 1])
+            case 7: c = a >> combo(program[pc + 1])
             default: fatalError()
             }
 
+            pc += 2
             return true
         }
     }
@@ -194,42 +81,34 @@ struct Day17: ParsingCommand {
 
             var results: [Int] = []
 
-            for j in bits[i+2] {
-                for k in bits[i+1] {
-                nextA:
-                    for l in bits[i] {
-                        let aBits = j << 2 | k << 1 | l
+            for (j, (k, l)) in product(bits[i+2], product(bits[i+1], bits[i])) {
+                let a = j << 2 | k << 1 | l
+                let b = a ^ 0b010
 
-                        let b = aBits ^ 0b010
-                        var bits = bits
+                var bits = bits
 
-                        bits[i] = [l]
-                        bits[i+1] = [k]
-                        bits[i+2] = [j]
+                // set bits of our chosen a value
+                bits[i] = [l]
+                bits[i+1] = [k]
+                bits[i+2] = [j]
 
-                        // given the value of b, we need to find an a such that
-                        // c = a >> b
-                        // (b ^ c) ^ 0b111 == output
+                // given the value of b, we need to find an a such that
+                // c = a >> b
+                // (b ^ c) ^ 0b111 == output
 
-                        let c = (output ^ 0b111) ^ b
+                let c = (output ^ 0b111) ^ b
+                assert( (b ^ c) ^ 0b111 == output )
 
-                        assert( (b ^ c) ^ 0b111 == output )
+                // Check that bits can support this value of c
+                guard (0..<3).allSatisfy({ bits[i + b + $0].contains((c >> $0) & 1) }) else { continue }
 
-                        // Check that bits can support this value of c, restricting future bits as appropriate.
-                        for bit in (0..<3) {
-                            let value = (c >> bit) & 1
+                // restricting future bits as appropriate
+                bits[i + b] = [c & 1]
+                bits[i + b + 1] = [(c >> 1) & 1]
+                bits[i + b + 2] = [(c >> 2) & 1]
 
-                            guard bits[i + b + bit].contains(value) else {
-                                continue nextA
-                            }
-                            bits[i + b + bit] = [(c >> bit) & 1]
-                        }
-
-                        if let result = find(i: i + 3, rest: rest.dropFirst(), bits: bits) {
-                            results.append(result)
-                        }
-
-                    }
+                if let result = find(i: i + 3, rest: rest.dropFirst(), bits: bits) {
+                    results.append(result)
                 }
             }
 
@@ -244,7 +123,7 @@ struct Day17: ParsingCommand {
             var cpu = input
             cpu.a = part2
             while cpu.execute() {}
-            assert(cpu.output.elementsEqual(input.program))
+            guard cpu.output.elementsEqual(input.program) else { fatalError() }
         }
         print("Part 2", part2)
     }
