@@ -60,18 +60,46 @@ struct Day19: ParsingCommand {
     func run() throws {
         let (patterns, desired) = try parsed(file: "19.txt")
 
-        var cache = [Array<UInt8>:Bool]()
-        let possiblePatterns = desired.filter {
-            isPossible(pattern: $0, cache: &cache, patterns: patterns)
+        let part1 = LockIsolated([Bool](repeating: false, count: desired.count))
+        DispatchQueue.concurrentPerform(iterations: desired.count) { i in
+            let pattern = desired[i]
+            var cache = [[UInt8]:Bool]()
+            let result = isPossible(pattern: pattern, cache: &cache, patterns: patterns)
+            part1.withLock {
+                $0[i] = result
+            }
         }
 
+        let possiblePatterns = part1.withLock {
+            zip(desired, $0).filter(\.1).map(\.0)
+        }
         print("Part 1", possiblePatterns.count)
 
-        do {
-            var cache = [[UInt8]:Int]()
-            let part2 = possiblePatterns.reduce(0) { $0 + count(pattern: $1, cache: &cache, patterns: patterns) }
+        let part2 = ManagedAtomic(0)
 
-            print("Part 2", part2)
+        DispatchQueue.concurrentPerform(iterations: possiblePatterns.count) {
+            var cache = [[UInt8]:Int]()
+            let count = count(pattern: possiblePatterns[$0], cache: &cache, patterns: patterns)
+            part2.wrappingIncrement(by: count, ordering: .relaxed)
         }
+
+        print("Part 2", part2.load(ordering: .relaxed))
     }
+}
+
+final class LockIsolated<Value>: @unchecked Sendable {
+  private var _value: Value
+  private let lock = NSRecursiveLock()
+  init(_ value: @autoclosure @Sendable () throws -> Value) rethrows {
+    self._value = try value()
+  }
+  func withLock<T: Sendable>(
+    _ operation: @Sendable (inout Value) throws -> T
+  ) rethrows -> T {
+    lock.lock()
+    defer { lock.unlock() }
+    var value = _value
+    defer { _value = value }
+    return try operation(&value)
+  }
 }
