@@ -87,19 +87,25 @@ extension ParsingCommand {
             Day16.self,
             Day17.self,
             Day18.self,
+            Day19.self,
         ]
     )
 
     init() { }
 
     func run() throws {
-        func go<T>(_ type: T.Type) throws where T: ParsableCommand {
+        func go<T>(_ type: T.Type) throws -> TimeInterval where T: ParsableCommand {
             print(T._commandName)
             var command = try T.parse(nil)
+            let start = Date()
             try command.run()
-            print()
+            let end = Date()
+            print("-> took \(String(format: "%0.3f", end.timeIntervalSince(start))) seconds\n")
+            return end.timeIntervalSince(start)
         }
 
-        try Self.configuration.subcommands.forEach { try go($0) }
+        let duration = try Self.configuration.subcommands.reduce(0.0) { try $0 + go($1) }
+        print("-> took \(String(format: "%0.3f", duration)) seconds\n")
+
     }
 }
