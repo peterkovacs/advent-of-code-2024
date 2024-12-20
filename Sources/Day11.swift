@@ -1,6 +1,6 @@
 import ArgumentParser
+import Foundation
 import Parsing
-import _math
 
 struct Day11: ParsingCommand {
     @Argument var file: String = "11.txt"

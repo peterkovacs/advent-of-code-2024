@@ -2,7 +2,6 @@ import ArgumentParser
 import Atomics
 import Dispatch
 import Parsing
-import _math
 
 struct Day7: ParsingCommand {
     static var parser: some Parser<Substring.UTF8View, [(Int, [Int])]> {
