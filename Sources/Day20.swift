@@ -1,5 +1,6 @@
 import ArgumentParser
 import Atomics
+import Algorithms
 import Collections
 import Foundation
 import Parsing
@@ -7,6 +8,8 @@ import Parsing
 struct Day20: ParsableCommand {
     @Argument var file: String = "20.txt"
 
+    // BFS from end to all points in grid to establish the distance
+    // While we're going through the grid, capture the start, end of each 2-step shortcut.
     func calculateDistances(_ input: Grid<Character>) -> (Grid<Int>, [(Coord, Coord)]) {
         guard let start = input.indices.first(where: { input[$0] == "E" }) else { fatalError("Start not found") }
         var result = Grid(repeating: Int.max, size: input.size)
@@ -52,6 +55,7 @@ struct Day20: ParsableCommand {
 
         print("Part 1", part1)
 
+        // This is anything that's not-wall.
         let path = distances.indices
             .filter { distances[$0] < Int.max }
 
