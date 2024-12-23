@@ -41,7 +41,7 @@ struct Day23: ParsingCommand {
         }
         /*
          https://univ-angers.hal.science/hal-02709508/document
-         Algorithm 1 A simple algorithm to find the maximum clique C∗
+         Algorithm 1 A simple algorithm to find the maximum clique C*
          Function Main
              C* ←∅// the maximum clique
              Clique(∅, V )
@@ -71,7 +71,7 @@ struct Day23: ParsingCommand {
             if C.count + P.count > maxClique.count {
                 var P = P
                 for p in P.sorted() {
-                    P.subtract([p])
+                    P.remove(p)
                     let Cʹ = C.union([p])
                     let Pʹ = P.intersection(graph[p, default: []])
 

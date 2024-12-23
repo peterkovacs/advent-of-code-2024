@@ -5,42 +5,57 @@ import Collections
 import Foundation
 import Parsing
 
-struct PseudoRandom: IteratorProtocol, Sequence {
-    var secretNumber: Int
+struct PRNG: IteratorProtocol, Sequence {
+    var seed: Int
 
     mutating func next() -> Int? {
-        secretNumber ^= (secretNumber << 6)
-        secretNumber %= 16777216
-        secretNumber ^= (secretNumber >> 5)
-        secretNumber %= 16777216
-        secretNumber ^= (secretNumber << 11)
-        secretNumber %= 16777216
+        seed ^= (seed << 6)
+        seed %= 16777216
+        seed ^= (seed >> 5)
+        seed %= 16777216
+        seed ^= (seed << 11)
+        seed %= 16777216
 
-        return secretNumber
+        return seed
     }
 }
 
 struct Price: IteratorProtocol, Sequence {
-    var pseudoRandom: PseudoRandom
-    var previous: Int
+    var rng: PRNG
+    var previous: (Int, Int, Int, Int, Int)
 
-    init(pseudoRandom: PseudoRandom) {
-        self.pseudoRandom = pseudoRandom
-        self.previous = pseudoRandom.secretNumber
+    init(_ rng: PRNG) {
+        self.rng = rng
+        self.previous = (
+            rng.seed,
+            self.rng.next()!,
+            self.rng.next()!,
+            self.rng.next()!,
+            self.rng.next()!
+        )
     }
 
-    mutating func next() -> (Int, Int)? {
-        guard let next = pseudoRandom.next() else { return nil }
-        defer { previous = next }
+    // Returns Sequence of diffs
+    mutating func next() -> (Int, Int, Int)? {
+        guard let next = rng.next() else { return nil }
+        defer { previous = (previous.1, previous.2, previous.3, previous.4, next) }
 
-        return (next % 10, (next % 10) - (previous % 10))
+        return (
+            (((10 + (previous.1 % 10) - (previous.0 % 10)) << 24) & 0x0000ff000000) |
+            (((10 + (previous.2 % 10) - (previous.1 % 10)) << 16) & 0x000000ff0000) |
+            (((10 + (previous.3 % 10) - (previous.2 % 10)) <<  8) & 0x00000000ff00) |
+             ((10 + (previous.4 % 10) - (previous.3 % 10))        & 0x0000000000ff),
+            previous.4 % 10,
+            previous.4
+        )
     }
 }
 
 struct Day22: ParsingCommand {
-    static var parser: some Parser<Substring.UTF8View, [PseudoRandom]> {
+    @Argument var file = "22.txt"
+    static var parser: some Parser<Substring.UTF8View, [PRNG]> {
         Many {
-            Parse(PseudoRandom.init) {
+            Parse(PRNG.init) {
                 Int.parser()
             }
         } separator: {
@@ -49,56 +64,57 @@ struct Day22: ParsingCommand {
     }
 
     func run() throws {
-        let input = try parsed(file: "22.txt")
+        let input = try parsed(file: file)
+
+        let sequences = Grid<(Int, Int, Int)>(
+            input.map(Price.init).flatMap { $0.prefix(2000-3) },
+            size: .init(x: 2000-3, y: input.count)
+        )
 
         do {
-            let part1 = input.reduce(into: 0) { partialResult, i in
-                partialResult += Array(i.dropFirst(1999).prefix(1))[0]
-            }
+            let part1 = sequences.column(2000-4).map(\.2).reduce(0, +)
             print("Part 1", part1)
         }
 
         do {
-            let changes: Grid<(Int, Int)> = Grid(
-                input.map(Price.init).flatMap { $0.prefix(2000) },
-                size: .init(x: 2000, y: input.count)
-            )
+            typealias Seq = Int
+            typealias Y = Int
+            typealias X = Int
 
-            struct Seq: Hashable {
-                let _0, _1, _2, _3: Int
+            var result = [Seq: Int]()
+            for y in 0..<sequences.size.y {
+
+                // use the fact that we're iterating in increasing X order
+                // so we can throw away the set of seen sequences after processing
+                var seen: Set<Seq> = []
+                seen.reserveCapacity(sequences.size.x)
+
+                for x in 0..<sequences.size.x {
+                    let (sequence, bananas, _) = sequences[.init(x: x, y: y)]
+
+                    if seen.insert(sequence).inserted {
+                        // if this is the first time we've seen this sequence for this monkey,
+                        // we can add our bananas to the sequence total.
+                        result[sequence, default: 0] += bananas
+                    }
+                }
             }
 
-            let s = Dictionary.init(
-                grouping: product((0..<changes.size.y), (0..<(changes.size.x - 3))).map { y, x in
-                    return (
-                        Seq(
-                            _0: changes[Coord(x: x, y: y)].1,
-                            _1: changes[Coord(x: x + 1, y: y)].1,
-                            _2: changes[Coord(x: x + 2, y: y)].1,
-                            _3: changes[Coord(x: x + 3, y: y)].1
-                        ),
-                        Coord(x: x, y: y),
-                        changes[Coord(x: x + 3, y: y)].0
-                    )
-                },
-                by: \(Seq, Coord, Int).0
-            )
-            // sequence: [all appearances of this sequence in each row]
-                .mapValues { (sequenceMatches: [(Seq, Coord, Int)]) in
+            let part2 = result
+                .values
+                .max()
 
-                    // row: [all appearances of this sequence in the given row]
-                    Dictionary(grouping: sequenceMatches, by: \.1.y)
-
-                    // row: first appearince of sequence in given row -> number of bananas.
-                        .mapValues { values in
-                            values.min { a, b in a.1.x < b.1.x }!.2
-                        }
-                        .values
-                        .reduce(0, +)
-                }
-
-            print("Part 2", s.values.max())
-
+            print("Part 2", part2!)
         }
     }
 }
+
+//extension Collection where Self: Sendable {
+//    public func concurrentlyReduce(_ initialResult: Int, _ nextPartialResult: @Sendable (ManagedAtomic<Int>, Element) -> ()) -> Int {
+//        let partialResult = ManagedAtomic(initialResult)
+//        DispatchQueue.concurrentPerform(iterations: count) { index in
+//            nextPartialResult(partialResult, self[self.index(self.startIndex, offsetBy: index)])
+//        }
+//        return partialResult.load(ordering: .relaxed)
+//    }
+//}

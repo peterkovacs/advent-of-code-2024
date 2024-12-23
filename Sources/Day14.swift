@@ -88,16 +88,3 @@ fileprivate extension Vector {
         return result
     }
 }
-
-fileprivate extension Grid where Element == Character {
-    func plot(vectors: [Vector]) -> Self {
-        var result = self
-
-        result.column(size.x / 2).forEach { result[$0] = "|" }
-        result.row(size.y / 2).forEach { result[$0] = "-" }
-
-        vectors.forEach { result[$0.position] = "#" }
-
-        return result
-    }
-}

@@ -270,14 +270,14 @@ extension Grid: Sequence {
     .init(grid: self, iterator: indices)
   }
 
-  public func column(_ col: Int) -> ColumnIterator {
-    guard col < bounds.x else { return .init(size: bounds, coordinate: bounds) }
-    return .init(size: bounds, coordinate: .init(x: col, y: 0))
+  public func column(_ col: Int) -> some Sequence<Element> {
+    guard col < bounds.x else { return ColumnIterator(size: bounds, coordinate: bounds).lazy.map { self[$0] } }
+    return ColumnIterator(size: bounds, coordinate: .init(x: col, y: 0)).lazy.map { self[$0] }
   }
 
-  public func row(_ row: Int) -> RowIterator {
-    guard row < bounds.y else { return .init(size: size, coordinate: size) }
-    return .init(size: bounds, coordinate: .init(x: 0, y: row))
+  public func row(_ row: Int) -> some Sequence<Element> {
+    guard row < bounds.y else { return RowIterator(size: size, coordinate: size).lazy.map { self[$0] } }
+    return RowIterator(size: bounds, coordinate: .init(x: 0, y: row)).lazy.map { self[$0] }
   }
 
   public var indices: CoordinateIterator {
