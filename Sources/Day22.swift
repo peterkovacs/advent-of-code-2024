@@ -77,21 +77,13 @@ struct Day22: ParsingCommand {
         }
 
         do {
-            typealias Seq = Int
-            typealias Y = Int
-            typealias X = Int
-
-            var result = [Seq: Int]()
+            var result = [Int: Int]()
             for y in 0..<sequences.size.y {
 
-                // use the fact that we're iterating in increasing X order
+                // use the fact that we're iterating a given monkey in increasing order
                 // so we can throw away the set of seen sequences after processing
-                var seen: Set<Seq> = []
-                seen.reserveCapacity(sequences.size.x)
-
-                for x in 0..<sequences.size.x {
-                    let (sequence, bananas, _) = sequences[.init(x: x, y: y)]
-
+                var seen = Set<Int>(minimumCapacity: sequences.size.x)
+                for (sequence, bananas, _) in sequences.row(y) {
                     if seen.insert(sequence).inserted {
                         // if this is the first time we've seen this sequence for this monkey,
                         // we can add our bananas to the sequence total.
