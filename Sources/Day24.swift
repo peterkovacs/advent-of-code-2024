@@ -122,7 +122,7 @@ struct Day24: ParsingCommand {
 
                         // We can check that Cin is correct as it should be conencted to this output.
                         if Cin != Cinʹ {
-                            print("\(Cin) should have been connected to B, but \(Cinʹ) was instead")
+                            // print("\(Cin) should have been connected to B, but \(Cinʹ) was instead")
                             bad.insert(Cin)
                             bad.insert(Cinʹ)
                         }
@@ -130,7 +130,7 @@ struct Day24: ParsingCommand {
                         let (Aʹ, Bʹ) = BXOR
                         B = Bʹ
 
-                        print("\(A) should have been an input to \(Aʹ) was instead")
+                        // print("\(A) should have been an input to \(Aʹ) was instead")
                         bad.insert(A)
                         bad.insert(Aʹ)
                     } else {
@@ -139,8 +139,9 @@ struct Day24: ParsingCommand {
                 }
 
                 if B != Zout {
-                    print("\(B) should have been \(Zout)")
+                    // print("\(B) should have been \(Zout)")
                     bad.insert(B)
+                    bad.insert(Zout)
                 }
 
                 let C: String
@@ -150,15 +151,17 @@ struct Day24: ParsingCommand {
                         C = Cʹ
 
                         if Cin != CAND.0 {
-                            print("\(Cin) should have been connected to C, but \(Cinʹ) was instead")
+                            // print("\(Cin) should have been connected to C, but \(Cinʹ) was instead")
                             bad.insert(Cin)
+                            bad.insert(Cinʹ)
                         }
                     } else if let CAND = gates[.init(input: Cin, op: .and)] {
                         let (Aʹ, Cʹ) = CAND
                         C = Cʹ
 
-                        print("\(A) should have been an input to C, but \(Aʹ) was instead")
+                        // print("\(A) should have been an input to C, but \(Aʹ) was instead")
                         bad.insert(A)
+                        bad.insert(Aʹ)
                     } else {
                         fatalError()
                     }
@@ -174,14 +177,16 @@ struct Day24: ParsingCommand {
                         E = Eʹ
 
                         if C != Cʹ {
-                            print("\(C) should have been connected to E, but \(Cʹ) was instead")
+                            // print("\(C) should have been connected to E, but \(Cʹ) was instead")
                             bad.insert(C)
+                            bad.insert(Cʹ)
                         }
                     } else if let EOR = gates[.init(input: C, op: .or)] {
                         let (Dʹ, Eʹ) = EOR
                         E = Eʹ
-                        print("\(D) should have been an input to E, but \(Dʹ) was instead")
+                        // print("\(D) should have been an input to E, but \(Dʹ) was instead")
                         bad.insert(D)
+                        bad.insert(Dʹ)
                     } else {
                         fatalError()
                     }
