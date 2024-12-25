@@ -92,6 +92,7 @@ extension ParsingCommand {
             Day21.self,
             Day22.self,
             Day23.self,
+            Day24.self,
         ]
     )
 
